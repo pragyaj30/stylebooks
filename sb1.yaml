@@ -1,0 +1,95 @@
+name: addnew
+namespace: com.citrix.example.stylebooks
+version: "1.0"
+description: This StyleBook defines a NetScaler configuration for Authentication vserver.
+display-name: Authentication Vserver StyleBook
+schema-version: "1.0"
+
+import-stylebooks:
+  -
+    namespace: netscaler.nitro.config
+    prefix: ns
+    version: "10.5"
+  -
+    namespace: com.citrix.adc.commontypes
+    prefix: cmtypes
+    version: "1.0"
+
+parameters:
+  -
+    name: auth-vserver-name
+    label: "Name for authentication vserver"
+    description: "Name for authentication vserver"
+    type: string
+    key: true
+    required: true
+  -
+    name: auth-vserver-ip
+    label: "Virtual IP address of Authentication vserver"
+    description: "Virtual IP address of Authentication vserver"
+    type: ipaddress
+    required: true
+
+  -
+    name: auth-virtual-port
+    label: "Authentication Vserver Virtual Port"
+    description: "TCP port representing the Authentication Vserver"
+    type: tcp-port
+    default: 443
+    required: true
+
+  -
+    name: auth-service-type
+    label: "Authentication vserver Protocol"
+    description: "Protocol used for the Authentication vserver"
+    type: string
+    default: SSL
+    required: true
+  -
+    name: auth-domain
+    label: "FQDN of Authentication vserver"
+    description: "FQDN Domain Authentication vserver"
+    type: string
+    required: true
+    
+  
+
+  -
+    name: create-lbvserver
+    label: "Create or Skip lbvserver"
+    description: "If true lbvserver will be created"
+    type: boolean
+    default: true
+  -
+    name: create-lbvserver2
+    label: "Create or Skip lbvserver"
+    description: "If true lbvserver will be created"
+    type: boolean
+    default: true
+
+components:
+  -
+    name: authvserver-comp
+    type: ns::authenticationvserver
+    properties:
+      name: $parameters.auth-vserver-name
+      ipv46: $parameters.auth-vserver-ip
+      port: $parameters.auth-virtual-port
+      servicetype: $parameters.auth-service-type
+      authenticationdomain: $parameters.auth-domain
+
+  -
+    name: lbvserver-comp
+    type: ns::lbvserver
+    condition: $parameters.create-lbvserver
+    properties:
+     name: lbssl
+     servicetype: SSL
+     ipv46: 44.55.33.22
+     port: 443
+     lbmethod: LEASTCONNECTION
+
+outputs:
+  -
+    name: authvserver
+    value: $components.authvserver-comp
